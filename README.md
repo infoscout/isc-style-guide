@@ -1,8 +1,11 @@
 # InfoScout Style Guide
 
-WIP
+[![CircleCI](https://circleci.com/gh/infoscout/isc-style-guide.svg?style=svg)](https://circleci.com/gh/infoscout/isc-style-guide)
+[![codecov](https://codecov.io/gh/infoscout/isc-style-guide/branch/master/graph/badge.svg)](https://codecov.io/gh/infoscout/isc-style-guide)
 
 ## Python Style
+
+WIP
 
 InfoScout primarily follows the [Google Python Style Guide](http://google.github.io/styleguide/pyguide.html), but has a few exceptions and additions.
 
