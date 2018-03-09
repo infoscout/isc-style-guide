@@ -18,6 +18,7 @@ jobs:
           command: |
             source venv/bin/activate
             coverage run setup.py test
+            coverage xml
       - run:
           name: Send coverage results to CodeCov
           command: bash <(curl -s https://codecov.io/bash)
