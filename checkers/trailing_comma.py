@@ -55,8 +55,8 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
         current_iterables = []
 
         for token_type, token, (srow, _,), (erow, _,), _ in tokens:
-            # Ignore whitespace tokens
-            if token == '\n':
+            # Ignore comments and whitespace tokens
+            if token_type == tokenize.COMMENT or token == '\n':
                 continue
 
             # Assume for now that the next potential iterable will definitely be one

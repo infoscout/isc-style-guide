@@ -92,6 +92,28 @@ class TestIterableTrailingCommaChecker(CheckerTestCase):
         ]
         self.assertCodeAddsMessages(code, messages)
 
+    def testMultilineIterableTrailingCommaIgnoresComments(self):
+        # Verify that a multiline iterable ending in a trailing comma (with comments) does not produce any messages
+        code = """
+            x = (
+                1,
+                2,  # comment
+            )
+            y = [
+                1,
+                2,  # comment
+            ]
+            z = {
+                1,
+                2,  # comment
+            }
+            d = {
+                'a': 1,
+                'b': 2,  # comment
+            }
+        """
+        self.assertCodeAddsMessages(code)
+
     def testDictionaryAccessIsNotConsideredList(self):
         code = """
             d[
