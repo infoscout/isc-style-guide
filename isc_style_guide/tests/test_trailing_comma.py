@@ -1,7 +1,7 @@
 from pylint.testutils import Message
 
-from checkers.trailing_comma import IterableTrailingCommaChecker
-from tests.utils import CheckerTestCase
+from isc_style_guide.checkers.trailing_comma import IterableTrailingCommaChecker
+from isc_style_guide.tests.utils import CheckerTestCase
 
 
 class TestIterableTrailingCommaChecker(CheckerTestCase):

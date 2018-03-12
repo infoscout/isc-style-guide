@@ -13,5 +13,5 @@ setup(
     url='http://github.com/infoscout/isc-style-guide',
     version=version,
     install_requires=['pylint'],
-    test_suite='tests'
+    test_suite='isc_style_guide.tests'
 )
