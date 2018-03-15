@@ -8,6 +8,9 @@ class CheckerTestCase(PylintCheckerTestCase, unittest.TestCase):
     def setUp(self):
         self.setup_method()
 
+
+class TokenCheckerTestCase(CheckerTestCase):
+
     def assertCodeAddsMessages(self, code, messages=None):
         tokens = _tokenize_str(code)
         context_manager = self.assertNoMessages()

@@ -1,10 +1,10 @@
 from pylint.testutils import Message
 
 from isc_style_guide.checkers.trailing_comma import IterableTrailingCommaChecker
-from isc_style_guide.tests.utils import CheckerTestCase
+from isc_style_guide.tests.utils import TokenCheckerTestCase
 
 
-class TestIterableTrailingCommaChecker(CheckerTestCase):
+class TestIterableTrailingCommaChecker(TokenCheckerTestCase):
 
     CHECKER_CLASS = IterableTrailingCommaChecker
 
