@@ -51,12 +51,14 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
     }
 
     def process_tokens(self, tokens):
-        last_token_type = last_token = last_token_erow = None
+        # ews = excluding whitespace, iws = including whitespace
+        last_token_ews_type = last_token_ews = last_token_ews_erow = last_token_iws = None
         current_iterables = []
 
         for token_type, token, (srow, _,), (erow, _,), _ in tokens:
             # Ignore comments and whitespace tokens
             if token_type == tokenize.COMMENT or token == '\n':
+                last_token_iws = token  # Record information about the last token
                 continue
 
             # Assume for now that the next potential iterable will definitely be one
@@ -65,14 +67,14 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
             # If we see an open paren, downgrade the status to possible
             # unless we can immediately determine that this is definitely not a tuple
             if token == '(':
-                if last_token_type == tokenize.NAME:
+                if last_token_ews_type == tokenize.NAME or last_token_iws == ')':
                     iterable_status = self.ITERABLE_STATUS_NO
                 else:
                     iterable_status = self.ITERABLE_STATUS_POSSIBLE
 
             # If we see an open square bracket, determine if this may represent something that's definitely not a list
             elif token == '[':
-                if last_token_type == tokenize.NAME:
+                if last_token_ews_type == tokenize.NAME or last_token_iws == ')':
                     iterable_status = self.ITERABLE_STATUS_NO
                 else:
                     iterable_status = self.ITERABLE_STATUS_DEFINITELY
@@ -91,16 +93,16 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
                 finished_iterable = current_iterables.pop()
                 if finished_iterable.status == self.ITERABLE_STATUS_DEFINITELY:
                     # Tuples should end in a trailing comma
-                    if finished_iterable.bracket_type == self.BRACKET_TYPE_PAREN and last_token != ',':
-                        self.add_message('tuple-missing-trailing-comma', line=last_token_erow)
+                    if finished_iterable.bracket_type == self.BRACKET_TYPE_PAREN and last_token_ews != ',':
+                        self.add_message('tuple-missing-trailing-comma', line=last_token_ews_erow)
                     # Multiline iterables should end in a trailing comma
-                    elif finished_iterable.start_row != erow and last_token != ',':
-                        self.add_message('multiline-iterable-missing-trailing-comma', line=last_token_erow)
+                    elif finished_iterable.start_row != erow and last_token_ews != ',':
+                        self.add_message('multiline-iterable-missing-trailing-comma', line=last_token_ews_erow)
                     # Inline iterables should not end in a trailing comma (except for tuples)
                     elif (
                         finished_iterable.bracket_type != self.BRACKET_TYPE_PAREN
                         and finished_iterable.start_row == erow
-                        and last_token == ','
+                        and last_token_ews == ','
                     ):
                         self.add_message('inline-iterable-trailing-comma', line=erow)
 
@@ -116,9 +118,10 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
                 current_iterables.append(current_iterable)
 
             # Record information about the last token
-            last_token_type = token_type
-            last_token = token
-            last_token_erow = erow
+            last_token_ews_type = token_type
+            last_token_ews = token
+            last_token_ews_erow = erow
+            last_token_iws = token
 
 
 def register(linter):

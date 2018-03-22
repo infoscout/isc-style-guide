@@ -22,6 +22,18 @@ class TestIterableTrailingCommaChecker(TokenCheckerTestCase):
         """
         self.assertCodeAddsMessages(code)
 
+    def testMethodCallIsNotConsideredTuple(self):
+        code = """
+            self.foo(x, y)
+        """
+        self.assertCodeAddsMessages(code)
+
+    def testMethodCallUsingGetattrIsNotConsideredTuple(self):
+        code = """
+            getattr(self, 'foo')(x, y)
+        """
+        self.assertCodeAddsMessages(code)
+
     def testMultilineIterableTrailingComma(self):
         # Verify that a multiline iterable that does not end in a trailing comma does produce a message
         code = """
@@ -70,6 +82,15 @@ class TestIterableTrailingCommaChecker(TokenCheckerTestCase):
             }
         """
         self.assertCodeAddsMessages(code)
+
+    def testMultilineIterableImmediatelyAfterFunctionCallTrailingComma(self):
+        code = """
+            bar = foo()
+            (
+                x, y, z
+            ) = bar
+        """
+        self.assertCodeAddsMessages(code, Message('tuple-missing-trailing-comma', line=4))
 
     def testMultilineIterableSingleItemTrailingComma(self):
         # Verify that a multiline iterable (even with just a single item) produces a message
