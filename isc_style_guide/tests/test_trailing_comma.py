@@ -143,6 +143,23 @@ class TestIterableTrailingCommaChecker(TokenCheckerTestCase):
         """
         self.assertCodeAddsMessages(code)
 
+    def testComprehensionsDoNotRequireTrailingComma(self):
+        code = """
+            x = (
+                i for i in range(10)
+            )
+            y = [
+                i for i in range(10)
+            ]
+            z = {
+                i for i in range(10)
+            }
+            d = {
+                i: i for i in range(10)
+            }
+        """
+        self.assertCodeAddsMessages(code)
+
     def testInlineIterableNoTrailingComma(self):
         # Verify that an inline list, set, or dict that ends in a trailing comma produces a message
         code = """

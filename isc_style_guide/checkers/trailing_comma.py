@@ -50,6 +50,40 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
         ),
     }
 
+    @classmethod
+    def promote_or_demote_iterable(cls, token, current_iterables):
+        # Skip if we're not in an iterable yet
+        if not current_iterables:
+            return []
+
+        # Inspect the current iterable
+        current_iterable = current_iterables.pop()
+
+        # If we see a comma while in a single-item tuple, we can promote it to definitely a tuple
+        if (
+            token == ','
+            and current_iterable.bracket_type == cls.BRACKET_TYPE_PAREN
+            and current_iterable.status == cls.ITERABLE_STATUS_POSSIBLE
+        ):
+            current_iterable = PotentialIterable(
+                bracket_type=cls.BRACKET_TYPE_PAREN,
+                status=cls.ITERABLE_STATUS_DEFINITELY,
+                start_row=current_iterable.start_row
+            )
+
+        # If we see a for statement while in an iterable, we demote it to definitely not an iterable (comprehension)
+        if token == 'for' and current_iterable.status != cls.ITERABLE_STATUS_NO:
+            current_iterable = PotentialIterable(
+                bracket_type=current_iterable.bracket_type,
+                status=cls.ITERABLE_STATUS_NO,
+                start_row=current_iterable.start_row
+            )
+
+        # Re-apply the current iterable to the list of iterables
+        current_iterables.append(current_iterable)
+
+        return current_iterables
+
     def process_tokens(self, tokens):
         # ews = excluding whitespace, iws = including whitespace
         last_token_ews_type = last_token_ews = last_token_ews_erow = last_token_iws = None
@@ -106,16 +140,8 @@ class IterableTrailingCommaChecker(BaseTokenChecker):
                     ):
                         self.add_message('inline-iterable-trailing-comma', line=erow)
 
-            # If we see a comma while in a single-item tuple, we can promote it to definitely a tuple
-            if token == ',' and current_iterables and current_iterables[-1].bracket_type == self.BRACKET_TYPE_PAREN:
-                current_iterable = current_iterables.pop()
-                if current_iterable.status == self.ITERABLE_STATUS_POSSIBLE:
-                    current_iterable = PotentialIterable(
-                        bracket_type=self.BRACKET_TYPE_PAREN,
-                        status=self.ITERABLE_STATUS_DEFINITELY,
-                        start_row=current_iterable.start_row
-                    )
-                current_iterables.append(current_iterable)
+            # Promote/demote current iterable based on the current token
+            current_iterables = self.promote_or_demote_iterable(token, current_iterables)
 
             # Record information about the last token
             last_token_ews_type = token_type
