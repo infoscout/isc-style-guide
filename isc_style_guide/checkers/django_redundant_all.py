@@ -9,6 +9,15 @@ class DjangoRedundantAllMethodChecker(BaseChecker):
     Checks that Django managers and querysets do not use the all() method redundantly.
     """
 
+    # Includes all built-in queryset methods, excluding all() and delete()
+    DJANGO_QUERYSET_REDUNDANT_METHODS = set([
+        'filter', 'exclude', 'annotate', 'order_by', 'reverse', 'distinct', 'values', 'values_list', 'dates',
+        'datetimes', 'none', 'union', 'intersection', 'difference', 'select_related', 'prefetch_related', 'extra',
+        'defer', 'only', 'using', 'select_for_update', 'raw', 'get', 'create', 'get_or_create', 'update_or_create',
+        'bulk_create', 'count', 'in_bulk', 'iterator', 'latest', 'earliest', 'first', 'last', 'aggregate', 'exists',
+        'update', 'as_manager',
+    ])
+
     __implements__ = IAstroidChecker
 
     name = 'django_redundant_all'
@@ -30,7 +39,10 @@ class DjangoRedundantAllMethodChecker(BaseChecker):
         # Two all()s are actually redundant, but we'll get the second one when visiting children
         # so that we don't report them twice
         grandparent = node.parent.parent
-        if isinstance(grandparent, astroid.Call) and grandparent.func.attrname not in ('all', 'delete',):
+        if (
+            isinstance(grandparent, astroid.Call)
+            and grandparent.func.attrname in self.DJANGO_QUERYSET_REDUNDANT_METHODS
+        ):
             self.add_message('django-all-redundant', node=node)
             return
 

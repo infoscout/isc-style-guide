@@ -49,3 +49,10 @@ class TestDjangoRedundantAllMethodChecker(CheckerTestCase):
         second_all_node = astroid.extract_node("__(User.objects.all().all())")
         with self.assertAddsMessages(Message('django-all-redundant', node=second_all_node)):
             self.checker.visit_call(second_all_node)
+
+    def testCustomMethodsCannotBeConsideredRedundant(self):
+        all_node = astroid.extract_node("__(User.objects.all()).custom_method()")
+        custom_method_node = astroid.extract_node("__(User.objects.all().custom_method())")
+        with self.assertNoMessages():
+            for node in (all_node, custom_method_node,):
+                self.checker.visit_call(node)
