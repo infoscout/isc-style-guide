@@ -12,6 +12,6 @@ setup(
     description='Custom checkers for Pylint that enforce InfoScout Python style',
     url='http://github.com/infoscout/isc-style-guide',
     version=version,
-    install_requires=['pylint'],
+    install_requires=['pylint < 2.0.0.dev0'],
     test_suite='isc_style_guide.tests'
 )
